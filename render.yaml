@@ -1,0 +1,15 @@
+# Render Blueprint Configuration
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: explainable-cardiac-risk-app
+    env: python
+    plan: free
+    buildCommand: "./render-build.sh"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: NODE_VERSION
+        value: 20.11.0

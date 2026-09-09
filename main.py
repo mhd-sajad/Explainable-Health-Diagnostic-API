@@ -55,6 +55,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+from fastapi.staticfiles import StaticFiles
+
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(diagnostics_router)
 
@@ -70,12 +73,16 @@ def health_check():
     }
 
 
-# ── Root ─────────────────────────────────────────────────────────────────────
-@app.get("/", tags=["System"])
-def root():
-    return {
-        "message": "Welcome to the Explainable Cardiac Risk API",
-        "docs": "/docs",
-        "health": "/health",
-    }
+# ── Mount Frontend Static Files (for Render / Production) ─────────────────────
+if os.path.exists("frontend/dist"):
+    app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
+else:
+    @app.get("/", tags=["System"])
+    def root():
+        return {
+            "message": "Welcome to the Explainable Cardiac Risk API",
+            "docs": "/docs",
+            "health": "/health",
+        }
+
 
