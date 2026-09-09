@@ -1,0 +1,31 @@
+# ╔══════════════════════════════════════════════════════════╗
+# ║  Dockerfile — FastAPI Backend                           ║
+# ╚══════════════════════════════════════════════════════════╝
+
+FROM python:3.11-slim
+
+LABEL maintainer="Muhammed Sajad <https://github.com/mhd-sajad>"
+LABEL description="Explainable Cardiac Risk Diagnostic API"
+
+# ── System dependencies ─────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Python dependencies ─────────────────────────────────
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ── Application source ──────────────────────────────────
+COPY backend/ ./backend/
+COPY model/   ./model/
+COPY main.py  .
+
+# ── Train model if artifact doesn't exist ──────────────
+RUN python model/train.py
+
+# ── Runtime ─────────────────────────────────────────────
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

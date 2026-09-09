@@ -1,0 +1,108 @@
+.fi-section { padding: 80px 0; }
+
+.fi-content { margin-top: 48px; display: flex; flex-direction: column; gap: 24px; }
+
+/* ── Chart Card ── */
+.fi-chart-card { padding: 28px 32px; }
+
+.fi-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 20px;
+  letter-spacing: 0.2px;
+}
+
+/* ── Custom Tooltip ── */
+.fi-tooltip {
+  background: rgba(9, 13, 26, 0.95);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.fit-name { font-size: 0.75rem; color: var(--text-2); font-weight: 600; margin-bottom: 4px; }
+.fit-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; }
+.fit-val.pos { color: #f87171; }
+.fit-val.neg { color: #4ade80; }
+.fit-desc { font-size: 0.68rem; color: var(--text-3); margin-top: 4px; }
+
+/* ── Detail Cards Grid ── */
+.fi-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.fi-detail-card {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s;
+}
+.fi-detail-card:hover { transform: translateY(-2px); }
+
+.fid-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fid-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+.fid-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+
+.fid-label { font-size: 0.875rem; font-weight: 700; color: var(--text-1); }
+.fid-key { font-size: 0.65rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+
+.fid-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.fid-val.pos { color: #f87171; }
+.fid-val.neg { color: #4ade80; }
+
+/* ── Animated Bar ── */
+.fid-bar-track {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.fid-bar {
+  height: 100%;
+  border-radius: 99px;
+}
+.bar-pos { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.bar-neg { background: linear-gradient(90deg, #16a34a, #22c55e); }
+
+/* ── Impact ── */
+.fid-impact { font-size: 0.72rem; font-weight: 500; }
+.impact-high { color: #f87171; }
+.impact-low  { color: #4ade80; }
+
+/* ── Explainability Note ── */
+.fi-note {
+  display: flex;
+  gap: 16px;
+  padding: 20px 24px;
+  align-items: flex-start;
+}
+.fi-note-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+.fi-note p { font-size: 0.875rem; color: var(--text-2); line-height: 1.7; }
+.fi-note code {
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #a5b4fc;
+}
+
+@media (max-width: 700px) {
+  .fi-cards-grid { grid-template-columns: 1fr; }
+}

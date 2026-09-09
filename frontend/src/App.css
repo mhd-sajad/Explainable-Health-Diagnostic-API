@@ -1,0 +1,6 @@
+/* App-level overrides and main layout resets */
+* { box-sizing: border-box; }
+
+main { min-height: 100vh; }
+
+.App { position: relative; z-index: 1; }

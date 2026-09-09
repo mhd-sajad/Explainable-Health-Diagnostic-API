@@ -1,0 +1,3 @@
+# model/artifacts — generated model files (gitignored)
+*.joblib
+*.json
