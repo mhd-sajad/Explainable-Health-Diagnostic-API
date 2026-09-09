@@ -1,37 +1,47 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { healthCheck } from '../api';
 import './Navbar.css';
 
+const links = [
+  { href: '#calculator', label: 'Assess' },
+  { href: '#results',    label: 'Results' },
+  { href: '#explain',    label: 'Explain' },
+  { href: '#history',    label: 'History' },
+];
+
 export default function Navbar() {
-  const navRef = useRef(null);
+  const [online, setOnline] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
-      if (navRef.current) {
-        navRef.current.classList.toggle('scrolled', window.scrollY > 40);
-      }
-    };
+    healthCheck()
+      .then(() => setOnline(true))
+      .catch(() => setOnline(false));
+
+    const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
-    <nav className="navbar" ref={navRef}>
-      <div className="navbar-inner container">
-        <div className="navbar-brand">
-          <span className="brand-icon">❤️</span>
-          <span className="brand-text">
-            Cardiac<span className="gradient-text">AI</span>
-          </span>
-        </div>
-        <div className="navbar-links">
-          <a href="#calculator">Calculator</a>
-          <a href="#results">Results</a>
-          <a href="#importance">Explainability</a>
-          <a href="#history">History</a>
-        </div>
-        <div className="navbar-status" id="nav-status">
-          <span className="status-dot"></span>
-          <span className="status-text">API Live</span>
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+      <a href="#" className="navbar-logo">
+        <span className="logo-icon">♥</span>
+        CARDIAC<span className="lime">AI</span>
+      </a>
+
+      <ul className="navbar-links">
+        {links.map(l => (
+          <li key={l.href}>
+            <a href={l.href}>{l.label}</a>
+          </li>
+        ))}
+      </ul>
+
+      <div className="navbar-status">
+        <div className={`status-badge ${online ? 'online' : ''}`}>
+          <span className="status-dot" />
+          {online ? 'API Live' : 'Offline'}
         </div>
       </div>
     </nav>

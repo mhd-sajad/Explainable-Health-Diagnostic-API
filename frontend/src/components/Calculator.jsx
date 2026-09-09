@@ -1,200 +1,111 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { createAssessment } from '../api';
 import './Calculator.css';
 
-const VITALS_CONFIG = [
-  {
-    key: 'age',
-    label: 'Age',
-    unit: 'years',
-    min: 18, max: 110, default: 55,
-    icon: '👤',
-    desc: 'Patient age in years',
-    color: '#818cf8',
-  },
-  {
-    key: 'blood_pressure',
-    label: 'Blood Pressure',
-    unit: 'mmHg',
-    min: 70, max: 250, default: 130,
-    icon: '🩸',
-    desc: 'Resting systolic blood pressure',
-    color: '#f87171',
-  },
-  {
-    key: 'cholesterol',
-    label: 'Cholesterol',
-    unit: 'mg/dl',
-    min: 100, max: 500, default: 220,
-    icon: '🧪',
-    desc: 'Serum cholesterol level',
-    color: '#fbbf24',
-  },
-  {
-    key: 'max_heart_rate',
-    label: 'Max Heart Rate',
-    unit: 'bpm',
-    min: 60, max: 220, default: 150,
-    icon: '💓',
-    desc: 'Maximum heart rate achieved',
-    color: '#34d399',
-  },
+const fields = [
+  { key: 'age',            icon: '👤', label: 'Age',            unit: 'Years', min: 18,  max: 110, step: 1,  default: 55,
+    status: v => v < 40 ? ['status-normal','Young'] : v < 60 ? ['status-elevated','Middle-aged'] : ['status-high','Senior'] },
+  { key: 'blood_pressure', icon: '🩸', label: 'Blood Pressure', unit: 'mmHg',  min: 70,  max: 250, step: 1,  default: 130,
+    status: v => v < 120 ? ['status-normal','Normal'] : v < 140 ? ['status-elevated','Elevated'] : ['status-high','High'] },
+  { key: 'cholesterol',    icon: '⚗️', label: 'Cholesterol',    unit: 'mg/dL', min: 100, max: 500, step: 1,  default: 220,
+    status: v => v < 200 ? ['status-normal','Desirable'] : v < 240 ? ['status-elevated','Borderline'] : ['status-high','High'] },
+  { key: 'max_heart_rate', icon: '💓', label: 'Max Heart Rate', unit: 'BPM',   min: 60,  max: 220, step: 1,  default: 150,
+    status: v => v < 100 ? ['status-low','Low'] : v < 160 ? ['status-normal','Average'] : ['status-elevated','High'] },
 ];
 
 export default function Calculator({ onResult }) {
-  const [vitals, setVitals] = useState({
-    age: 55,
-    blood_pressure: 130,
-    cholesterol: 220,
-    max_heart_rate: 150,
-  });
+  const init = Object.fromEntries(fields.map(f => [f.key, f.default]));
+  const [vals, setVals] = useState(init);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
-  const handleSlider = (key, value) => {
-    setVitals((prev) => ({ ...prev, [key]: Number(value) }));
-  };
+  const set = (key, val) => setVals(v => ({ ...v, [key]: Number(val) }));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submit = async () => {
     setLoading(true);
-    setError(null);
+    setError('');
     try {
-      const { data } = await createAssessment(vitals);
+      const { data } = await createAssessment(vals);
       onResult(data);
-      // Scroll to results
-      setTimeout(() => {
-        document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' });
-      }, 200);
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to connect to the API. Make sure the backend is running.');
+      document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' });
+    } catch {
+      setError('⚠ Failed to connect to the API. Make sure the backend is running.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section id="calculator" className="calc-section">
+    <section className="calc-section" id="calculator">
       <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="section-label">🩺 Step 1</div>
-          <h2 className="section-title">
-            Patient <span className="gradient-text">Vitals Input</span>
+        <div className="calc-header">
+          <div className="calc-step">◆ Step 1</div>
+          <h2 className="calc-title">
+            Patient <span>Vitals</span> Input
           </h2>
-          <p className="section-sub">
+          <p className="calc-subtitle">
             Adjust the sliders or type values directly. The AI will assess cardiac risk instantly.
           </p>
-        </motion.div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="calc-form" id="vitals-form">
-          <div className="vitals-grid">
-            {VITALS_CONFIG.map((v, i) => (
-              <motion.div
-                key={v.key}
-                className="vital-card glass-card"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-              >
-                <div className="vital-header">
-                  <span className="vital-icon">{v.icon}</span>
-                  <div className="vital-meta">
-                    <span className="vital-label">{v.label}</span>
-                    <span className="vital-desc">{v.desc}</span>
+        <div className="calc-grid">
+          {fields.map(f => {
+            const v = vals[f.key];
+            const pct = ((v - f.min) / (f.max - f.min)) * 100;
+            const [cls, label] = f.status(v);
+
+            return (
+              <div className="calc-card" key={f.key}>
+                <div className="calc-card-top">
+                  <div className="calc-card-meta">
+                    <div className="calc-card-icon">{f.icon}</div>
+                    <div className="calc-card-name">{f.label}</div>
+                    <div className="calc-card-desc">{f.unit}</div>
                   </div>
-                  <div className="vital-value-wrap">
-                    <input
-                      id={`input-${v.key}`}
-                      type="number"
-                      className="vital-num-input"
-                      min={v.min}
-                      max={v.max}
-                      value={vitals[v.key]}
-                      onChange={(e) => handleSlider(v.key, e.target.value)}
-                    />
-                    <span className="vital-unit">{v.unit}</span>
+                  <div className="calc-card-value-box">
+                    <div className="calc-card-num">{v}</div>
+                    <div className="calc-card-unit">{f.unit}</div>
                   </div>
                 </div>
 
-                <div className="slider-wrap">
-                  <span className="slider-bound">{v.min}</span>
-                  <div className="slider-track">
+                <div className="calc-slider-wrap">
+                  <div className="calc-slider-track">
+                    <div className="calc-slider-fill" style={{ width: `${pct}%` }} />
                     <input
-                      id={`slider-${v.key}`}
                       type="range"
-                      min={v.min}
-                      max={v.max}
-                      value={vitals[v.key]}
-                      onChange={(e) => handleSlider(v.key, e.target.value)}
-                      className="vital-slider"
-                      style={{ '--accent': v.color, '--pct': `${((vitals[v.key] - v.min) / (v.max - v.min)) * 100}%` }}
+                      min={f.min} max={f.max} step={f.step}
+                      value={v}
+                      onChange={e => set(f.key, e.target.value)}
                     />
                   </div>
-                  <span className="slider-bound">{v.max}</span>
                 </div>
 
-                {/* Mini reference bar */}
-                <div className="vital-ref">
-                  <span style={{ color: v.color, fontSize: '0.7rem' }}>
-                    {getVitalStatus(v.key, vitals[v.key])}
-                  </span>
+                <div className="calc-slider-range">
+                  <span>{f.min}</span>
+                  <span>{f.max}</span>
                 </div>
-              </motion.div>
-            ))}
-          </div>
 
-          {error && (
-            <motion.div
-              className="error-banner"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              ⚠️ {error}
-            </motion.div>
-          )}
+                <div className={`calc-status ${cls}`}>
+                  <span className="s-dot" />
+                  {label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-          <div className="calc-submit-row">
-            <button
-              type="submit"
-              className="btn-primary submit-btn"
-              id="submit-assessment-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <span>🧠</span>
-                  Run AI Assessment
-                </>
-              )}
-            </button>
-            <div className="submit-hint">
-              Results + explainability scores will appear below ↓
-            </div>
-          </div>
-        </form>
+        <div className="calc-cta">
+          <button
+            id="submit-assessment-btn"
+            className="btn btn-lime"
+            onClick={submit}
+            disabled={loading}
+          >
+            {loading ? 'Analysing...' : 'Run AI Assessment →'}
+          </button>
+          {error && <span className="calc-error">{error}</span>}
+        </div>
       </div>
     </section>
   );
-}
-
-function getVitalStatus(key, val) {
-  const map = {
-    age: val < 40 ? '✅ Young' : val < 60 ? '⚡ Middle-aged' : '⚠️ Senior',
-    blood_pressure: val < 120 ? '✅ Normal' : val < 140 ? '⚡ Elevated' : '⚠️ Hypertension',
-    cholesterol: val < 200 ? '✅ Optimal' : val < 240 ? '⚡ Borderline' : '⚠️ High',
-    max_heart_rate: val > 160 ? '✅ Excellent' : val > 130 ? '⚡ Average' : '⚠️ Low',
-  };
-  return map[key] || '';
 }
