@@ -55,6 +55,12 @@ Explainable_Health_Diagnostic_API/
 ├── render.yaml                 # Render Blueprint configuration for 1-click deploy
 ├── render-build.sh             # Build script for Python dependencies + Frontend build
 │
+├── data/                       # Clinical Datasets
+│   └── heart_disease.csv       # UCI / Kaggle Cleveland real patient dataset (303 rows)
+│
+├── notebooks/                  # Model Research & Validation
+│   └── cardiac_risk_model_selection.ipynb  # EDA, model benchmarks, & GridSearch CV
+│
 ├── backend/                    # Core Application Layer
 │   ├── schemas.py              # Pydantic request/response models
 │   ├── database.py             # Thread-safe in-memory CRUD store
