@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// In Docker:   nginx proxies /diagnostics/* → backend container
+// In dev:      Vite proxy forwards /diagnostics/* → localhost:8000
+// Both use the same origin, so no CORS issues.
+const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({
   baseURL: BASE_URL,

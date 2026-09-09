@@ -25,12 +25,21 @@ def _vitals_to_dataframe(vitals: PatientVitals) -> pd.DataFrame:
 def compute_feature_importance(vitals: PatientVitals) -> dict[str, float]:
     """
     Return a per-feature contribution score (coefficient × feature value).
-    This gives a simple, linear-model-specific explanation of the prediction.
+    Handles both a bare LogisticRegression and an sklearn Pipeline.
     Values are rounded to 4 decimal places for readability.
     """
+    from sklearn.pipeline import Pipeline
+
     model = get_model()
     input_values = [vitals.age, vitals.blood_pressure, vitals.cholesterol, vitals.max_heart_rate]
-    coefficients = model.coef_[0]
+
+    # Support Pipeline objects (e.g. StandardScaler → LogisticRegression)
+    if isinstance(model, Pipeline):
+        classifier = model.named_steps["classifier"]
+    else:
+        classifier = model
+
+    coefficients = classifier.coef_[0]
 
     importance = {
         feature: round(float(coef * value), 4)
